@@ -321,7 +321,7 @@ nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft
       </div>
       <div class="stack" style="gap:8px">
         <div class="vlinks" id="kataVid"></div>
-        <p class="note">Les vidéos du Kodokan montrent chaque technique dans sa forme générale (série « 100 techniques ») : la forme du kata peut différer. Connexion nécessaire.</p>
+        <p class="note">« Démonstration » ouvre la vidéo du kata au début de chaque technique. « Forme générale » montre la technique hors kata (série « 100 techniques » du Kodokan). Connexion nécessaire.</p>
       </div>
       <div class="marks">
         <span>Toma <b>≈ 1,2 m</b></span>
@@ -334,6 +334,7 @@ nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft
         <div class="in">
           <ol id="cerList"></ol>
           <p class="note">Kyoshi : genou gauche au sol orteils relevés, pied droit écarté sur le côté, main droite sur le genou droit.</p>
+          <div class="vlinks" id="cerVid"></div>
         </div>
       </details>
       <div id="seriesList" class="stack" style="gap:20px"></div>
@@ -476,6 +477,7 @@ nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft
     <div class="stack">
       <h3>Ressources en ligne</h3>
       <div class="res">
+        <a href="https://www.youtube.com/watch?v=oKaCgO0FdPk" target="_blank" rel="noopener"><b>Katame-no-kata, démonstration complète</b><span>Vidéo de référence du kata. L'onglet Kata ouvre chaque technique à son début.</span></a>
         <a href="https://www.youtube.com/@KODOKANJUDO" target="_blank" rel="noopener"><b>Chaîne YouTube officielle du Kodokan</b><span>Série « 100 techniques » : immobilisations, étranglements, clés et projections, avec les sorties d'immobilisation.</span></a>
         <a href="https://apps.apple.com/fr/app/judokai/id1493052354" target="_blank" rel="noopener"><b>Judokai (App Store)</b><span>Techniques Kodokan en vidéo, téléchargeables pour le hors-ligne. iPhone et iPad. Pas de katame-no-kata à ce jour.</span></a>
         <a href="https://www.youtube.com/watch?v=TXmWKs4A1dk" target="_blank" rel="noopener"><b>Katame-no-kata, vidéo d'instruction du Kodokan</b><span>Copie publiée sur YouTube par le club Judo Koroška, pas par le Kodokan.</span></a>
@@ -604,6 +606,10 @@ const VID = {
 };
 const ESC = {"kesa-gatame":"5_TS0YHdxcQ", "kami-shiho-gatame":"seGsXy9I4G8", "yoko-shiho-gatame":"yK_GSamSPko"};
 const YT = (id) => "https://www.youtube.com/watch?v=" + id;
+/* Démonstration complète du katame-no-kata : repères de début fournis par l'utilisateur (12 nov. 2026). */
+const DEMO = "oKaCgO0FdPk";
+const DEMO_T = {open:5, 1:32, 2:86, 3:122, 4:185, 5:236, 6:286, 7:340, 8:357, 9:374, 10:402, 11:452, 12:484, 13:500, 14:533, 15:554, close:570};
+const demoUrl = (t) => "https://www.youtube.com/watch?v=" + DEMO + "&t=" + t + "s";
 function chSearch(q){ return CH + "/search?query=" + encodeURIComponent(q.replace(/gesa/g, "kesa")); }
 function techVideo(name){ const k = name.toLowerCase(); return VID[k] ? {url: YT(VID[k]), direct: true} : {url: chSearch(name), direct: false}; }
 function playIcon(){
@@ -632,11 +638,14 @@ function el(tag, attrs, kids){
   (kids || []).forEach(c => { if (c != null) e.append(c); });
   return e;
 }
-function vidLinks(name){
-  const v = techVideo(name), k = name.toLowerCase();
-  const box = el("div",{cls:"vlinks"},[
-    el("a",{cls:"vbtn", href:v.url, target:"_blank", rel:"noopener"},[playIcon(), v.direct ? "Vidéo Kodokan" : "Chercher sur la chaîne Kodokan"])
-  ]);
+function demoBtn(key, label){
+  const t = DEMO_T[key];
+  return el("a",{cls:"vbtn", href:demoUrl(t), target:"_blank", rel:"noopener"},[playIcon(), (label || "Démonstration") + " · " + fmt(t)]);
+}
+function kataLinks(it){
+  const k = it.name.toLowerCase();
+  const box = el("div",{cls:"vlinks"},[demoBtn(it.n)]);
+  if (VID[k]) box.append(el("a",{cls:"vbtn alt", href:YT(VID[k]), target:"_blank", rel:"noopener"},[playIcon(), "Forme générale (Kodokan)"]));
   if (ESC[k]) box.append(el("a",{cls:"vbtn alt", href:YT(ESC[k]), target:"_blank", rel:"noopener"},[playIcon(), "Sorties d'uke (Kodokan)"]));
   return box;
 }
@@ -729,7 +738,7 @@ function renderKata(){
         el("div",{cls:"body"},[
           el("p",{cls:"setup",text:it.setup}),
           el("dl",{cls:"tu"},[el("dt",{text:"Tori"}), el("dd",{text:it.tori}), el("dt",{text:"Uke"}), el("dd",{text:it.uke})]),
-          vidLinks(it.name)
+          kataLinks(it)
         ])
       ]);
       if (open.has(String(it.n))) det.open = true;
@@ -741,9 +750,11 @@ function renderKata(){
   $("kataCount").textContent = kataMastered() + " / 15 techniques maîtrisées";
   const kv = $("kataVid"); kv.textContent = "";
   kv.append(
-    el("a",{cls:"vbtn", href:chSearch("Katame-no-kata"), target:"_blank", rel:"noopener"},[playIcon(), "Katame-no-kata sur la chaîne Kodokan"]),
+    demoBtn("open", "Démonstration complète"),
     el("a",{cls:"vbtn alt", href:CH, target:"_blank", rel:"noopener"},[playIcon(), "Chaîne Kodokan"])
   );
+  const cv = $("cerVid"); cv.textContent = "";
+  cv.append(demoBtn("open", "Ouverture"), demoBtn("close", "Clôture"));
   const g = $("gridList"); g.textContent = "";
   GRID.forEach(([t, d], i) => {
     const id = "grid" + i;
@@ -773,7 +784,8 @@ function renderStep(){
   $("rhPhase").textContent = st.phase;
   $("rhBar").style.width = ((rhIdx + 1) / STEPS.length * 100) + "%";
   if (st.type === "cer"){
-    card.append(el("span",{cls:"eyebrow",text:"Cérémonial"}), el("div",{cls:"big",text:st.title}), el("ol",null,st.lines.map(t => el("li",{text:t}))));
+    card.append(el("span",{cls:"eyebrow",text:"Cérémonial"}), el("div",{cls:"big",text:st.title}), el("ol",null,st.lines.map(t => el("li",{text:t}))),
+      el("div",{cls:"vlinks"},[demoBtn(st.title === "Ouverture" ? "open" : "close")]));
   } else if (st.type === "trans"){
     card.append(el("span",{cls:"eyebrow",text:"Transition"}), el("div",{cls:"big",text:"Changement de série"}), el("p",{cls:"setup",text:st.text}));
   } else {
@@ -784,7 +796,7 @@ function renderStep(){
       el("div",{cls:"jp",lang:"ja",text:it.jp}),
       el("p",{cls:"setup",text:it.setup}),
       el("dl",{cls:"tu"},[el("dt",{text:"Tori"}), el("dd",{text:it.tori}), el("dt",{text:"Uke"}), el("dd",{text:it.uke})]),
-      vidLinks(it.name),
+      kataLinks(it),
       el("p",{cls:"mairi",text:"Mairi : deux tapes. Puis relâcher, replacer le bras d'uke, reculer à chikama puis toma."})
     );
   }

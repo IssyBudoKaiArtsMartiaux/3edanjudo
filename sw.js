@@ -1,7 +1,7 @@
 /* Carnet Sandan : fonctionnement sans réseau.
    Les fichiers de l'appli sont gardés en cache à l'installation,
    puis servis depuis le cache et rafraîchis en arrière-plan quand le réseau est là. */
-const VERSION = "sandan-2026-11-12";
+const VERSION = "sandan-2026-11-12-2";
 const APP_CACHE = "app-" + VERSION;
 const FONT_CACHE = "fonts-v1";
 const CORE = [
