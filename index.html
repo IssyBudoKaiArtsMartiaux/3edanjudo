@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sandan">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ECEFE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121411" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Carnet Sandan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Shippori+Mincho+B1:wght@600;800&display=swap">
+<style>
+/* Layout : appli de tatami — en-tête collant, une vue à la fois, barre d'onglets au pouce en bas */
+:root{
+  --bg:#ECEFE6; --panel:#F7F8F3; --raised:#FFFFFF; --fg:#1A1C18; --muted:#5A6154; --line:#D2D7C7;
+  --accent:#2B4170; --accent-soft:#DDE3F1; --on-accent:#FFFFFF;
+  --ok:#4E6124; --ok-soft:#E0E8CA; --warn:#7E5A0C; --warn-soft:#F2E4BF; --bad:#9E3B27; --bad-soft:#F5DCD5;
+  --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",Georgia,serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --tabh:64px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121411; --panel:#1A1D18; --raised:#22261F; --fg:#E7EADF; --muted:#A0A796; --line:#31372D;
+  --accent:#9DB0DE; --accent-soft:#233154; --on-accent:#0E1526;
+  --ok:#B3C27A; --ok-soft:#28311A; --warn:#E0B456; --warn-soft:#3A2E12; --bad:#EA8068; --bad-soft:#3E211A;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121411; --panel:#1A1D18; --raised:#22261F; --fg:#E7EADF; --muted:#A0A796; --line:#31372D;
+  --accent:#9DB0DE; --accent-soft:#233154; --on-accent:#0E1526;
+  --ok:#B3C27A; --ok-soft:#28311A; --warn:#E0B456; --warn-soft:#3A2E12; --bad:#EA8068; --bad-soft:#3E211A;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-bottom:calc(var(--tabh) + 24px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.app{max-width:760px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:800;text-wrap:balance;margin:0;line-height:1.2}
+h2{font-size:24px}
+h3{font-size:18px}
+p{margin:0}
+a{color:var(--accent)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+[lang="ja"]{font-family:var(--display)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* En-tête */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;
+  padding-block:12px 10px;border-bottom:1px solid var(--line)}
+.top .kanji{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;letter-spacing:.02em}
+.top .brand{flex:1;min-width:0}
+.top .brand b{display:block;font-family:var(--display);font-size:17px}
+.top .brand span{font-size:12.5px;color:var(--muted)}
+.jchip{font-family:var(--mono);font-weight:600;font-size:14px;padding:6px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent);
+  border:0;text-decoration:none;white-space:nowrap}
+
+/* Vues */
+.view{display:flex;flex-direction:column;gap:22px;padding-top:18px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.lead{max-width:62ch;color:var(--muted)}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.note{font-size:13px;color:var(--muted);max-width:65ch}
+
+/* Boutons */
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--raised);color:var(--fg);
+  font:600 15px var(--body);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.big{min-height:56px;font-size:17px;flex:1}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;max-width:520px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:none;padding:8px 6px;border-radius:9px;font:500 14px/1.2 var(--body);color:var(--muted);cursor:pointer;min-height:42px;text-align:center}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+
+/* Puces d'état */
+.st{border-radius:999px;padding:4px 11px;font:500 12.5px var(--body);border:1px solid var(--line);background:var(--raised);color:var(--muted);
+  cursor:pointer;white-space:nowrap;min-height:30px}
+.st.s1{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.st.s2{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.st.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.flag{display:inline-block;border-radius:6px;padding:2px 8px;font:600 12px var(--body)}
+.flag.ok{background:var(--ok-soft);color:var(--ok)}
+.flag.warn{background:var(--warn-soft);color:var(--warn)}
+.flag.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* Tuiles de synthèse */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px;text-decoration:none;color:inherit}
+.tile .v{font-family:var(--mono);font-weight:600;font-size:24px;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:14px;color:var(--muted);font-weight:500}
+.tile .l{font-size:12.5px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok);width:0}
+
+/* Liste UV */
+.uvs{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.uv{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.uv:first-child{border-top:0}
+.uv .k{font-family:var(--mono);font-weight:600;color:var(--accent)}
+.uv b{display:block}
+.uv p{font-size:14px;color:var(--muted)}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:65ch}
+
+/* Date */
+.datebox{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.datebox input{font:500 16px var(--body);padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--raised);color:var(--fg);min-height:44px}
+
+/* Kata */
+.marks{display:flex;flex-wrap:wrap;gap:8px}
+.marks span{font-size:13px;padding:5px 10px;border-radius:8px;background:var(--panel);border:1px solid var(--line)}
+.marks b{font-family:var(--mono)}
+.series{display:flex;flex-direction:column;gap:8px}
+.series-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.series-h [lang="ja"]{font-size:22px;font-weight:800}
+.series-h .c{margin-left:auto;font-size:13px;color:var(--muted)}
+details.tech{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details.tech summary{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;min-height:52px}
+details.tech summary::-webkit-details-marker{display:none}
+.num{font-family:var(--mono);font-weight:600;color:var(--muted);font-size:14px;width:22px;flex:none}
+.nm{flex:1;min-width:0}
+.nm b{display:block;font-weight:600;overflow-wrap:anywhere}
+.nm small{color:var(--muted);font-size:13px}
+.tech .body{padding:0 12px 12px 46px;display:flex;flex-direction:column;gap:8px}
+dl.tu{margin:0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:6px 10px;font-size:14px}
+dl.tu dt{font-weight:600;color:var(--accent)}
+dl.tu dd{margin:0}
+.setup{font-size:14px;color:var(--muted)}
+details.cer{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0}
+details.cer summary{padding:12px 14px;cursor:pointer;font-weight:600}
+details.cer .in{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+details.cer ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.checks{display:flex;flex-direction:column;gap:2px}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.checks label:last-child{border-bottom:0}
+.checks input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--accent)}
+.checks b{display:block;font-weight:600}
+.checks span{font-size:14px}
+.checks small{display:block;color:var(--muted);font-size:13px}
+
+/* Répétition */
+.rehearse{display:flex;flex-direction:column;gap:14px}
+.rh-top{display:flex;align-items:center;gap:10px}
+.rh-top .mono{font-size:15px;font-weight:600;white-space:nowrap}
+.rh-top .eyebrow{flex:1;min-width:0}
+.rh-top .btn{min-height:38px;flex:none}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.rh-card{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:20px 18px;display:flex;flex-direction:column;gap:12px;min-height:44vh}
+.rh-card .big{font-family:var(--display);font-weight:800;font-size:clamp(26px,7vw,36px);line-height:1.15;overflow-wrap:anywhere}
+.rh-card .jp{font-size:22px;color:var(--muted)}
+.rh-card dl.tu{font-size:16px;grid-template-columns:52px minmax(0,1fr)}
+.rh-card .setup{font-size:16px}
+.rh-card ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px}
+.mairi{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:auto}
+.rh-nav{display:flex;gap:10px}
+
+/* UV2 */
+.rules{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.rules > div{padding:12px 14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.rules > div:first-child{border-top:0}
+.rules b{font-weight:600}
+.clock{font-family:var(--mono);font-weight:600;font-size:clamp(46px,15vw,72px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.clockbox{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.cur{font-size:16px;font-weight:600}
+.timeline{position:relative;height:14px;border-radius:4px;background:var(--line);overflow:hidden}
+.timeline i{position:absolute;top:0;bottom:0}
+.timeline .d{background:var(--accent)}
+.timeline .s{background:var(--ok)}
+.tlaxis{position:relative;height:16px;font:500 11px var(--mono);color:var(--muted)}
+.tlaxis span{position:absolute;transform:translateX(-50%)}
+.tlaxis span:first-child{transform:none}
+.tlaxis span:last-child{transform:translateX(-100%)}
+.checksum{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px 12px;align-items:center;font-size:14px}
+.checksum .mono{text-align:right}
+.blocks{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.blocks > div{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);font-size:14px}
+.blocks > div:first-child{border-top:0}
+.blocks > div.on{background:var(--accent-soft)}
+.blocks .t{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.blocks .tg{font-family:var(--mono);color:var(--muted);font-size:12.5px}
+.form{display:flex;flex-direction:column;gap:14px}
+.fgroup{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.fgroup label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.fgroup input{font:500 15px var(--body);padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--raised);color:var(--fg);min-height:42px;width:100%}
+.fgroup input::placeholder{color:var(--muted);opacity:.75;font-style:italic}
+.draw{display:flex;flex-direction:column;gap:8px}
+.dcard{background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center}
+.dcard b{font-family:var(--display);font-weight:800;font-size:20px;overflow-wrap:anywhere}
+.dcard .acts{grid-column:1/-1;display:flex;gap:8px}
+.dcard .acts .btn{min-height:40px;flex:1;font-size:14px}
+.dcard .acts .btn[aria-pressed="true"].okb{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.dcard .acts .btn[aria-pressed="true"].kob{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+
+/* Suivi */
+.counts{display:flex;gap:8px;flex-wrap:wrap}
+.counts span{font-size:13.5px;padding:5px 10px;border-radius:8px}
+.lineh{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.fam{display:flex;flex-direction:column;gap:6px}
+.fam h4{margin:0;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{border:1px solid var(--line);background:var(--raised);color:var(--fg);border-radius:999px;padding:6px 12px;font:500 14px var(--body);cursor:pointer;min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.tchip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.tchip.s1{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.tchip.s1::before{background:var(--warn)}
+.tchip.s2{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.tchip.s2::before{background:var(--ok)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* Plan */
+.phases{display:flex;flex-direction:column;gap:0;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.phases li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.phases li:first-child{border-top:0}
+.phases li.now{background:var(--accent-soft)}
+.phases .wk{font-family:var(--mono);font-weight:600;font-size:13px;color:var(--accent)}
+.phases b{display:block}
+.phases p{font-size:14px;color:var(--muted)}
+.res{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.res a{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-top:1px solid var(--line);text-decoration:none;color:var(--fg)}
+.res a:first-child{border-top:0}
+.res a b{color:var(--accent);font-weight:600}
+.res a span{font-size:13.5px;color:var(--muted)}
+.player{display:flex;flex-direction:column;gap:10px}
+.player input[type=file]{font:14px var(--body);max-width:100%}
+.player video{width:100%;max-width:100%;border-radius:12px;background:#000}
+.vlinks{display:flex;flex-wrap:wrap;gap:8px}
+.vbtn{display:inline-flex;align-items:center;gap:6px;font:600 13.5px var(--body);color:var(--accent);text-decoration:none;padding:7px 11px;border-radius:8px;background:var(--accent-soft);min-height:38px}
+.vbtn.alt{background:transparent;border:1px solid var(--line)}
+.vbtn svg{flex:none}
+.tpair{display:inline-flex;align-items:stretch}
+.tpair .tchip{border-top-right-radius:0;border-bottom-right-radius:0}
+.vmini{display:inline-flex;align-items:center;justify-content:center;width:36px;border:1px solid var(--line);border-left:0;border-radius:0 999px 999px 0;background:var(--raised);color:var(--accent)}
+.tpair .tchip.s1 + .vmini,.tpair .tchip.s2 + .vmini{border-color:transparent;border-left:1px solid var(--line)}
+footer.src{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;max-width:65ch}
+
+/* Barre d'onglets */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);padding:6px 2px;border-radius:10px;min-height:52px;font-size:11.5px;font-weight:500}
+nav.tabs a [lang="ja"]{font-size:19px;font-weight:800;line-height:1.1}
+nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+
+@media (max-width:420px){
+  .tiles{gap:8px}
+  .tile{padding:10px}
+  .tile .v{font-size:21px}
+  .tech .body{padding-left:12px}
+  .phases li,.uv{grid-template-columns:1fr;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <span class="kanji" lang="ja" aria-hidden="true">三段</span>
+    <div class="brand"><b>Carnet Sandan</b><span>3e dan judo · règlement 2026-2027</span></div>
+    <a class="jchip" id="jchip" href="#examen">Date ?</a>
+  </header>
+
+  <!-- EXAMEN -->
+  <section class="view" id="v-examen" data-view="examen">
+    <div class="stack">
+      <span class="eyebrow">Examen</span>
+      <h2>Où en est votre préparation</h2>
+      <div class="datebox">
+        <label for="examDate" class="small muted">Date de votre session</label>
+        <input type="date" id="examDate">
+        <span id="dateInfo" class="small muted"></span>
+      </div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+
+    <div class="stack">
+      <h3>Les 4 UV du 3e dan judo</h3>
+      <div class="uvs">
+        <div class="uv"><span class="k">UV1</span><div><b>Kata</b><p>Katame-no-kata, rôle de tori. Équivalence : podium aux championnats de France kata.</p></div></div>
+        <div class="uv"><span class="k">UV2</span><div><b>Technique</b><p>Épreuve 1 : 3 nage-waza et 2 ne-waza au choix, 8 min maximum. Épreuve 2 : 3 nage-waza et 2 ne-waza de l'annexe 1 imposées par le jury, 5 min maximum. UV non fractionnable.</p></div></div>
+        <div class="uv"><span class="k">UV3</span><div><b>Efficacité</b><p>Option 1 : 100 points cumulés, ou 5 victoires consécutives totalisant 44 points en une compétition. Option 2 : 20 points (dispense à partir de 40 ans) + uchi-komi 3 × 1 min, nage-komi 2 × 1 min, 2 exercices kakari-geiko ou yaku-soku-geiko de 2 min.</p></div></div>
+        <div class="uv"><span class="k">UV4</span><div><b>Engagement</b><p>1 journée de stage ou de mise en situation comme commissaire sportif ou arbitre. Équivalence : commissaire sportif ou arbitre départemental en activité.</p></div></div>
+      </div>
+      <p class="note">Présentation à 17 ans révolus, dès l'homologation du 2e dan. Homologation possible à 20 ans révolus avec 1 an de 2e dan. Ordre des épreuves libre.</p>
+    </div>
+
+    <div class="stack">
+      <h3>Points de vigilance</h3>
+      <ul class="plain">
+        <li>Aucune méconnaissance n'est prévue au 3e dan, alors que le 1er dan en tolère une par domaine.</li>
+        <li>Le texte dit « issues de l'annexe 1 » sans préciser si le jury se limite à la ligne 3e dan : à faire confirmer par votre CORG (Île-de-France).</li>
+        <li>Le goshin-jitsu et les défenses jujitsu ne font plus partie de l'examen judo.</li>
+        <li>Une UV entièrement validée avant le 1er septembre 2026 reste acquise jusqu'au 31 décembre 2028. Pour l'UV1, vous pouvez demander à présenter les katas de l'ancien règlement.</li>
+      </ul>
+    </div>
+
+    <footer class="src">Règlement des grades France Judo 2026-2027, applicable du 1er septembre 2026 au 31 août 2027 (§ 3.1 à 3.3.3 et 4.5). Vérifié le 6 novembre 2026. Seuls les textes officiels et votre CORG font foi.</footer>
+  </section>
+
+  <!-- KATA -->
+  <section class="view" id="v-kata" data-view="kata" hidden>
+    <div id="kataMain" class="view" style="padding-top:0">
+      <div class="stack">
+        <span class="eyebrow">UV1 · rôle de tori</span>
+        <h2>Katame-no-kata <span lang="ja">固の形</span></h2>
+        <p class="lead">15 techniques en 3 séries de 5, toujours dans cet ordre. Résumé du manuel du Kodokan (traduction de la Commission kata FIJ).</p>
+        <div class="row"><button class="btn primary" id="rhStart">Répéter pas à pas</button><span class="small muted" id="kataCount"></span></div>
+      </div>
+      <div class="stack" style="gap:8px">
+        <div class="vlinks" id="kataVid"></div>
+        <p class="note">Les vidéos du Kodokan montrent chaque technique dans sa forme générale (série « 100 techniques ») : la forme du kata peut différer. Connexion nécessaire.</p>
+      </div>
+      <div class="marks">
+        <span>Toma <b>≈ 1,2 m</b></span>
+        <span>Chikama <b>≈ 0,3 m</b></span>
+        <span>Ouverture <b>≈ 5,5 m</b></span>
+        <span>Mairi : <b>2 tapes</b> (du pied si mains prises)</span>
+      </div>
+      <details class="cer">
+        <summary>Cérémonial et repères communs</summary>
+        <div class="in">
+          <ol id="cerList"></ol>
+          <p class="note">Kyoshi : genou gauche au sol orteils relevés, pied droit écarté sur le côté, main droite sur le genou droit.</p>
+        </div>
+      </details>
+      <div id="seriesList" class="stack" style="gap:20px"></div>
+      <div class="stack">
+        <h3>Grille d'auto-contrôle</h3>
+        <p class="note">À cocher après relecture d'une vidéo de votre kata. Critères du référentiel des juges CSDGE 2024-2025.</p>
+        <div class="block checks" id="gridList"></div>
+      </div>
+    </div>
+
+    <div id="rehearse" class="rehearse" hidden>
+      <div class="rh-top">
+        <span class="mono" id="rhPos">1 / 21</span>
+        <span class="eyebrow" id="rhPhase"></span>
+        <button class="btn" id="rhClose">Quitter</button>
+      </div>
+      <div class="prog"><i id="rhBar"></i></div>
+      <div class="rh-card" id="rhCard" aria-live="polite"></div>
+      <div class="rh-nav">
+        <button class="btn big" id="rhPrev">Précédent</button>
+        <button class="btn primary big" id="rhNext">Suivant</button>
+      </div>
+      <p class="note">L'écran reste allumé pendant la répétition quand le téléphone l'autorise.</p>
+    </div>
+  </section>
+
+  <!-- UV2 -->
+  <section class="view" id="v-uv2" data-view="uv2" hidden>
+    <div class="stack">
+      <span class="eyebrow">UV2 · technique</span>
+      <h2>Démonstration et techniques imposées <span lang="ja">技</span></h2>
+    </div>
+    <div class="rules">
+      <div><span class="eyebrow">Épreuve 1 · au choix</span><b>3 nage-waza (3 min minimum) + 2 ne-waza (3 min minimum), 8 min maximum</b><span class="small muted">Debout : directions différentes, déplacements et enchaînements. Sol : à partir de situations de combat.</span></div>
+      <div><span class="eyebrow">Épreuve 2 · imposée</span><b>3 nage-waza + 2 ne-waza de l'annexe 1 choisies par le jury, 5 min maximum</b><span class="small muted">UV non fractionnable, jugée sur l'ensemble des deux épreuves.</span></div>
+    </div>
+    <div class="seg" role="group" aria-label="Outil UV2" id="uvSeg">
+      <button data-p="chrono" aria-pressed="true">Chrono épreuve 1</button>
+      <button data-p="prog" aria-pressed="false">Mon programme</button>
+      <button data-p="tirage" aria-pressed="false">Tirage blanc</button>
+    </div>
+
+    <div id="p-chrono" class="stack" style="gap:14px">
+      <div class="clockbox">
+        <div class="row" style="justify-content:space-between">
+          <span class="eyebrow" id="ckLabel">Prêt</span>
+          <span class="small muted mono">max 8:00</span>
+        </div>
+        <div class="clock" id="ckTotal">0:00</div>
+        <div class="cur" id="ckCur">Bloc 1 · Nage-waza 1 · avant</div>
+        <div>
+          <div class="timeline" id="ckLine"><i class="d" id="ckD"></i><i class="s" id="ckS"></i></div>
+          <div class="tlaxis"><span style="left:0">0</span><span style="left:37.5%">3:00</span><span style="left:75%">6:00</span><span style="left:100%">8:00</span></div>
+        </div>
+        <div class="row">
+          <button class="btn primary big" id="ckGo">Démarrer</button>
+          <button class="btn big" id="ckNext">Bloc suivant</button>
+        </div>
+        <button class="btn" id="ckReset">Remettre à zéro</button>
+      </div>
+      <div class="checksum" id="ckSum"></div>
+      <div class="blocks" id="ckBlocks"></div>
+      <p class="note">Durées cibles proposées : 1 min 10 par nage-waza, 1 min 45 par ne-waza, soit environ 7 min. Seules les bornes 3, 3 et 8 min sont réglementaires.</p>
+    </div>
+
+    <div id="p-prog" class="form" hidden>
+      <p class="note">Vos choix s'enregistrent sur ce téléphone et donnent leur nom aux blocs du chrono. Les textes en italique sont des exemples à remplacer, à valider avec votre professeur.</p>
+      <div id="progForm" class="form"></div>
+    </div>
+
+    <div id="p-tirage" class="stack" style="gap:14px" hidden>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Lignes de l'annexe" id="drawSeg">
+          <button data-l="3" aria-pressed="true">Ligne 3e dan</button>
+          <button data-l="all" aria-pressed="false">Lignes 1er à 3e dan</button>
+        </div>
+      </div>
+      <div class="clockbox">
+        <div class="row" style="justify-content:space-between">
+          <span class="eyebrow" id="dwLabel">Tirage prêt</span>
+          <span class="small muted mono">5:00 max</span>
+        </div>
+        <div class="clock" id="dwClock">5:00</div>
+        <div class="row">
+          <button class="btn primary big" id="dwGo">Démarrer</button>
+          <button class="btn big" id="dwNew">Nouveau tirage</button>
+        </div>
+      </div>
+      <div class="draw" id="drawList"></div>
+      <p class="note" id="drawRes"></p>
+      <p class="note">Simulation : 3 projections de familles différentes et 2 techniques au sol de familles différentes. « À revoir » ajoute la technique à votre liste de révision dans l'onglet Suivi.</p>
+    </div>
+  </section>
+
+  <!-- SUIVI -->
+  <section class="view" id="v-suivi" data-view="suivi" hidden>
+    <div class="stack">
+      <span class="eyebrow">Annexe 1 · programme technique</span>
+      <h2>Suivi des techniques <span lang="ja">録</span></h2>
+      <p class="lead">Touchez le nom pour changer l'état, le triangle pour la vidéo du Kodokan. La ligne 3e dan compte 26 techniques : 17 debout, 9 au sol.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Lignes affichées" id="lineSeg">
+      <button data-l="3" aria-pressed="true">Ligne 3e dan</button>
+      <button data-l="all" aria-pressed="false">Lignes 1er à 3e dan</button>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--line)"></i>À évaluer</span>
+      <span><i style="background:var(--warn)"></i>À revoir</span>
+      <span><i style="background:var(--ok)"></i>Maîtrisée</span>
+    </div>
+    <div class="counts" id="techCounts"></div>
+    <div id="techList" class="stack" style="gap:22px"></div>
+    <footer class="src">Liste de l'annexe 1 officielle 2025-2026, identique au résumé 2026-2027 de JudoLink vérifié le 5 octobre 2026. À recouper avec votre CORG. Vidéos : chaîne officielle KODOKAN, liens directs vérifiés le 6 novembre 2026 ; sinon le triangle ouvre une recherche sur cette chaîne. Certains noms de la nomenclature française n'existent pas chez le Kodokan : la recherche peut alors ne rien donner.</footer>
+  </section>
+
+  <!-- PLAN -->
+  <section class="view" id="v-plan" data-view="plan" hidden>
+    <div class="stack">
+      <span class="eyebrow">Préparation</span>
+      <h2>Plan sur 12 semaines <span lang="ja">計</span></h2>
+      <p class="lead" id="planInfo">Fixez la date de votre session dans l'onglet Examen pour situer la semaine en cours.</p>
+    </div>
+    <ol class="phases" id="phases"></ol>
+
+    <div class="stack">
+      <h3>Check-list</h3>
+      <div class="block checks" id="checkList"></div>
+    </div>
+
+    <div class="stack">
+      <h3>Mes vidéos sur le tatami</h3>
+      <p class="note">Rangez vos vidéos dans un album « 3e dan » du téléphone : kata de référence filmé au club, vos propres passages, votre épreuve 1. Elles se lisent sans connexion.</p>
+      <div class="player block">
+        <label for="vidFile" class="small muted">Lire une vidéo du téléphone ici (elle n'est pas copiée dans l'appli)</label>
+        <input type="file" id="vidFile" accept="video/*">
+        <video id="vid" controls playsinline hidden></video>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>Ressources en ligne</h3>
+      <div class="res">
+        <a href="https://www.youtube.com/@KODOKANJUDO" target="_blank" rel="noopener"><b>Chaîne YouTube officielle du Kodokan</b><span>Série « 100 techniques » : immobilisations, étranglements, clés et projections, avec les sorties d'immobilisation.</span></a>
+        <a href="https://apps.apple.com/fr/app/judokai/id1493052354" target="_blank" rel="noopener"><b>Judokai (App Store)</b><span>Techniques Kodokan en vidéo, téléchargeables pour le hors-ligne. iPhone et iPad. Pas de katame-no-kata à ce jour.</span></a>
+        <a href="https://www.youtube.com/watch?v=TXmWKs4A1dk" target="_blank" rel="noopener"><b>Katame-no-kata, vidéo d'instruction du Kodokan</b><span>Copie publiée sur YouTube par le club Judo Koroška, pas par le Kodokan.</span></a>
+        <a href="https://judopourtous.com/Zip/KataTechniqueKodokan/KodokanKatameNoKata.pdf" target="_blank" rel="noopener"><b>Manuel Kodokan du katame-no-kata (PDF, français)</b><span>Texte de référence, avec photos. À enregistrer dans le téléphone.</span></a>
+        <a href="https://www.metzjudo.com/documents/reglement-des-grades-2026-2027-384054" target="_blank" rel="noopener"><b>Règlement des grades 2026-2027</b><span>Extrait des textes officiels France Judo.</span></a>
+        <a href="https://www.judolink.app/uv2-3e-dan-judo/" target="_blank" rel="noopener"><b>JudoLink, UV2 du 3e dan</b><span>Résumé indépendant de l'annexe 1 2026-2027.</span></a>
+      </div>
+      <p class="note">Ces liens demandent une connexion.</p>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="in">
+    <a href="#examen" data-tab="examen"><span lang="ja">試</span>Examen</a>
+    <a href="#kata" data-tab="kata"><span lang="ja">形</span>Kata</a>
+    <a href="#uv2" data-tab="uv2"><span lang="ja">技</span>UV2</a>
+    <a href="#suivi" data-tab="suivi"><span lang="ja">録</span>Suivi</a>
+    <a href="#plan" data-tab="plan"><span lang="ja">計</span>Plan</a>
+  </div>
+</nav>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Données ---------- */
+const KATA = [
+ {key:"osae", jp:"抑込技", name:"Osaekomi-waza", fr:"Immobilisations", items:[
+  {n:1,name:"Kesa-gatame",jp:"袈裟固",setup:"Uke allongé sur le dos. Tori au côté droit d'uke : kyoshi à toma, puis chikama.",tori:"Bras droit d'uke bloqué sous l'aisselle gauche, manche saisie. Main droite passée sous l'aisselle gauche d'uke jusqu'à l'épaule. Poitrine contre poitrine, jambes écartées.",uke:"Tentatives de sortie variées : clé sur le coude, pont et genou glissé, renversement vers l'épaule gauche. Puis mairi."},
+  {n:2,name:"Kata-gatame",jp:"肩固",setup:"Depuis chikama, même côté.",tori:"Pousse le coude droit d'uke vers son oreille et bloque le bras avec la tête. Mains jointes sous la nuque, genou droit contre le flanc, jambe gauche tendue.",uke:"Pousse avec les coudes, glisse le genou sous la hanche de tori, tente de rouler en arrière. Puis mairi."},
+  {n:3,name:"Kami-shiho-gatame",jp:"上四方固",setup:"Tori se relève et va vers la tête d'uke : toma, puis chikama.",tori:"Mains sous les épaules jusqu'aux côtés de la ceinture. Poitrine sur poitrine, tête de côté, cous-de-pied au sol, hanches basses.",uke:"Pont avec rotation, main glissée sous l'aisselle, recul en glissant. Puis mairi."},
+  {n:4,name:"Yoko-shiho-gatame",jp:"横四方固",setup:"Tori revient au côté droit : toma, puis chikama.",tori:"Main droite entre les jambes, sous la cuisse gauche, jusqu'à la ceinture. Main gauche derrière la nuque, au col gauche. Genoux collés au flanc et à la hanche.",uke:"Jambe gauche vers le cou de tori, genou glissé dessous, renversement par la ceinture. Puis mairi."},
+  {n:5,name:"Kuzure-kami-shiho-gatame",jp:"崩上四方固",setup:"Tori vers la tête d'uke : toma, puis chikama. Entrée en diagonale vers la droite.",tori:"Bras droit d'uke coincé sous l'aisselle droite, posé sur la cuisse droite. Main droite au col arrière, main gauche sous l'épaule gauche jusqu'à la ceinture. Poitrine en diagonale.",uke:"Libère le bras et pivote, repousse la gorge, pont et renversement. Puis mairi."}
+ ]},
+ {key:"shime", jp:"絞技", name:"Shime-waza", fr:"Étranglements", items:[
+  {n:6,name:"Kata-juji-jime",jp:"片十字絞",setup:"Uke allongé à la même place. Tori côté droit : toma, puis chikama.",tori:"Bras droit d'uke déplacé sur la gauche de tori. Main gauche en saisie inversée profonde au col gauche, tori à cheval. Main droite en saisie normale au col droit, par-dessus la tête. Tire à gauche, pousse légèrement à droite.",uke:"Repousse les deux bras de tori. Puis mairi."},
+  {n:7,name:"Hadaka-jime",jp:"裸絞",setup:"Uke assis, dos droit, mains sur les cuisses. Tori derrière : toma, puis chikama.",tori:"Bras droit plié, poignet sur la gorge, mains jointes au-dessus de l'épaule gauche. Joue contre joue. Recul du pied gauche pour déséquilibrer vers l'arrière.",uke:"Tire le bras droit de tori vers le bas. Puis mairi."},
+  {n:8,name:"Okuri-eri-jime",jp:"送襟絞",setup:"Depuis chikama, tori s'installe près du dos d'uke.",tori:"Main gauche sous l'aisselle, tire le revers gauche vers le bas. Main droite profonde au col gauche, puis main gauche au revers droit. Déséquilibre arrière, genou droit contre le dos.",uke:"Tire le bras droit de tori vers le bas. Puis mairi."},
+  {n:9,name:"Kataha-jime",jp:"片羽絞",setup:"Même placement derrière uke.",tori:"Même entrée qu'okuri-eri-jime. Soulève le bras gauche d'uke par le coude et glisse la main gauche derrière la nuque. Serre en tirant la main droite et en tournant légèrement.",uke:"Tente d'abaisser son bras gauche. Puis mairi."},
+  {n:10,name:"Gyaku-juji-jime",jp:"逆十字絞",setup:"Uke s'allonge. Tori côté droit : toma, puis chikama.",tori:"À cheval, deux saisies inversées dans le col. Quand uke pousse les coudes, tori roule sur sa gauche, garde uke entre ses jambes croisées et accentue.",uke:"Pousse les coudes de tori. Puis mairi. Retour à la position initiale avant de relâcher."}
+ ]},
+ {key:"kan", jp:"関節技", name:"Kansetsu-waza", fr:"Clés", items:[
+  {n:11,name:"Ude-garami",jp:"腕緘",setup:"Uke allongé à la même place. Tori côté droit : toma, puis chikama.",tori:"Uke tend la main gauche vers le col droit de tori. Tori saisit le poignet, pose le bras au sol à angle droit et verrouille le coude en « 4 », poitrine contre poitrine.",uke:"Tente de s'échapper en pont, poignet tourné vers l'intérieur. Puis mairi."},
+  {n:12,name:"Ude-hishigi-juji-gatame",jp:"腕挫十字固",setup:"Depuis chikama, tori montre son intention d'attaquer.",tori:"Uke tend la main droite vers le col gauche. Tori tient le poignet des deux mains, pied droit sous l'aisselle, jambe gauche par-dessus la tête. S'allonge perpendiculaire, serre les genoux, lève les hanches.",uke:"Lève les hanches, tourne vers la gauche. Puis mairi."},
+  {n:13,name:"Ude-hishigi-ude-gatame",jp:"腕挫腕固",setup:"Depuis chikama, tori déplace le bras droit d'uke sur sa gauche.",tori:"Uke tend la main gauche. Tori coince le poignet entre épaule droite et cou, mains sur le coude, tibia droit sur les côtes basses. Verrouille en tournant le buste vers la gauche.",uke:"Tire son bras. Puis mairi."},
+  {n:14,name:"Ude-hishigi-hiza-gatame",jp:"腕挫膝固",setup:"À genoux face à face : toma, puis chikama. Saisie en garde droite.",tori:"Enroule le bras droit d'uke avec le bras gauche, paume sur le coude, poignet d'uke sous l'aisselle. Pied droit à l'intérieur de la cuisse gauche, bascule sur le côté, pied gauche sur la hanche, genou sur sa main au coude.",uke:"Pousse son bras vers tori. Puis mairi."},
+  {n:15,name:"Ashi-garami",jp:"足緘",setup:"Debout, saisie mutuelle en migi-shizentai.",tori:"Amorce tomoe-nage, pied droit sur l'abdomen. Quand uke avance du pied droit, glisse les hanches, pousse l'intérieur du genou gauche et place le pied gauche sur le côté droit de l'abdomen. Verrouille le genou en tournant les hanches et en tendant la jambe gauche.",uke:"Tente de tourner vers la gauche. Puis mairi."}
+ ]}
+];
+const OPEN = ["Tori à gauche, uke à droite, face au shomen, environ 5,5 m d'écart.","Salut debout vers le shomen, puis salut à genoux face à face.","Pas en avant du pied gauche en shizen-hontai, puis tous deux en kyoshi.","Uke avance d'un pas en shikko."];
+const COMMON = ["Approche de chaque technique : kyoshi à toma (≈ 1,2 m), puis avance en shikko jusqu'à chikama (≈ 0,3 m).","Mairi : uke tape deux fois, sur tori ou sur le tapis ; du pied s'il n'a pas les mains libres.","Après chaque technique : tori relâche, replace des deux mains le bras droit d'uke, recule à chikama puis à toma."];
+const CLOSE = ["Tori recule de deux pas jusqu'à toma, uke d'un pas.","Kyoshi face à face, puis relevé commun en shizen-hontai.","Salut à genoux, puis salut debout vers le shomen."];
+const TRANS = {
+  5:"Uke s'assoit, puis se place en kyoshi face à tori. Il s'allongera à la même place pour kata-juji-jime.",
+  10:"Tori se relève et revient à sa position de départ, en kyoshi. Uke se relève en kyoshi face à tori, puis s'allonge pour ude-garami.",
+  13:"Tori se place vers la tête d'uke. Uke se redresse en kyoshi : face à face, à genoux.",
+  14:"Uke se remet en kyoshi face à tori. Tous deux se relèvent ensemble."
+};
+const GRID = [
+  ["Respect de l'ordre","Les 15 techniques dans l'ordre, transitions entre séries sans hésitation."],
+  ["Distance","Kyoshi à toma puis chikama à chaque approche, sans raccourci."],
+  ["Cérémonial","Saluts synchronisés, kyoshi correct, retour aux positions de départ."],
+  ["Sincérité tori et uke","Uke tente réellement de sortir, de façon variée en immobilisation ; mairi net en deux tapes."],
+  ["Justesse technique","Saisies conformes (normale ou inversée), contrôle avant la finalisation, bras d'uke replacé des deux mains."],
+  ["Synergie","Rythme commun, sans temps mort ni précipitation."]
+];
+const FAM = {koshi:"Koshi-waza", te:"Te-waza", ashi:"Ashi-waza", sutemi:"Sutemi-waza", osae:"Osaekomi-waza", shime:"Shime-waza", kan:"Kansetsu-waza"};
+const NAGE = ["koshi","te","ashi","sutemi"], NE = ["osae","shime","kan"];
+const ANNEXE = {
+ "1":{koshi:["harai-goshi","kubi-nage","koshi-guruma","o-goshi","tsurikomi-goshi","uchi-mata","uki-goshi"],
+      te:["ippon-seoi-nage","kata-guruma","uki-otoshi","tai-otoshi","morote-seoi-nage"],
+      ashi:["de-ashi-barai","hiza-guruma","sasae-tsurikomi-ashi","ko-soto-gari","ko-uchi-gari","okuri-ashi-barai","o-soto-gari","o-uchi-gari","uchi-mata"],
+      sutemi:["sumi-gaeshi","tomoe-nage"],
+      osae:["hon-gesa-gatame","kami-shiho-gatame","yoko-shiho-gatame","tate-shiho-gatame","ushiro-gesa-gatame"],
+      shime:["gyaku-juji-jime","hadaka-jime","kata-juji-jime","nami-juji-jime","okuri-eri-jime"],
+      kan:["ude-hishigi-juji-gatame","ude-hishigi-ude-gatame","ude-garami"]},
+ "2":{koshi:["hane-goshi","sode-tsurikomi-goshi","tsuri-goshi"],
+      te:["eri-seoi-nage","te-guruma","morote-gari","kuchiki-taoshi"],
+      ashi:["o-guruma","ashi-guruma","ko-soto-gake","o-soto-otoshi","tsubame-gaeshi"],
+      sutemi:["ura-nage","tani-otoshi","yoko-guruma","yoko-gake","ko-uchi-makikomi","yoko-tomoe-nage","uki-waza"],
+      osae:["kuzure-kami-shiho-gatame","kuzure-gesa-gatame","kuzure-tate-shiho-gatame","kuzure-yoko-shiho-gatame"],
+      shime:["sankaku-jime","kata-ha-jime","kata-te-jime","sode-guruma-jime"],
+      kan:["ude-hishigi-hiza-gatame","ude-hishigi-waki-gatame"]},
+ "3":{koshi:["utsuri-goshi","ushiro-goshi"],
+      te:["sumi-otoshi","kibisu-gaeshi","uchi-mata-sukashi","sukui-nage","yama-arashi","seoi-otoshi"],
+      ashi:["harai-tsurikomi-ashi","o-soto-guruma","o-soto-gaeshi"],
+      sutemi:["soto-makikomi","harai-makikomi","yoko-wakare","yoko-otoshi","tawara-gaeshi","daki-wakare"],
+      osae:["makura-gesa-gatame","kata-gatame"],
+      shime:["morote-jime","tsukkomi-jime","ashi-gatame-jime","ryo-te-jime"],
+      kan:["ude-hishigi-ashi-gatame","ude-hishigi-sankaku-gatame","ude-hishigi-hara-gatame"]}
+};
+const PROG = [
+  {id:"n1",kind:"d",title:"Nage-waza 1 · direction avant",target:70,fields:[["tech","Ma technique","ex. uchi-mata"],["off","Opportunité offerte","ex. uke avance en tsugi-ashi"],["cre","Opportunité créée (enchaînement)","ex. o-uchi-gari puis uchi-mata"]]},
+  {id:"n2",kind:"d",title:"Nage-waza 2 · direction arrière",target:70,fields:[["tech","Ma technique","ex. ko-uchi-gari"],["off","Opportunité offerte","ex. uke en garde large"],["cre","Opportunité créée (enchaînement)","ex. morote-seoi-nage puis ko-uchi-gari"]]},
+  {id:"n3",kind:"d",title:"Nage-waza 3 · direction latérale",target:70,fields:[["tech","Ma technique","ex. de-ashi-barai"],["off","Opportunité offerte","ex. uke se déplace en pas chassés"],["cre","Opportunité créée (enchaînement)","à définir avec votre professeur"]]},
+  {id:"s1",kind:"s",title:"Ne-waza 1 · liaison debout-sol",target:105,fields:[["tech","Ma technique","ex. yoko-shiho-gatame"],["sit","Situation de combat","ex. après projection, uke tente de sortir"]]},
+  {id:"s2",kind:"s",title:"Ne-waza 2 · uke à quatre pattes",target:105,fields:[["tech","Ma technique","ex. okuri-eri-jime"],["sit","Situation de combat","ex. retournement, réaction d'uke, adaptation"]]}
+];
+const CHECK = [
+  "Confirmer avec la CORG Île-de-France les dates des sessions 3e dan et la portée de l'annexe 1.",
+  "Inscription par l'extranet, validée par le professeur du club.",
+  "Partenaire choisi et disponible pour le kata et l'UV2.",
+  "Judogi blanc sans dossard pour le candidat et le partenaire.",
+  "Katame-no-kata complet filmé et relu avec la grille d'auto-contrôle.",
+  "Épreuve 1 chronométrée : debout 3 min ou plus, sol 3 min ou plus, total 8 min ou moins.",
+  "Les 26 techniques de la ligne 3e dan démontrables sans hésitation.",
+  "UV3 et UV4 planifiées à part (option UV3 choisie, journée UV4 programmée)."
+];
+const PHASES = [
+  {w:"Sem. 1 à 3", from:1,to:3, t:"Apprentissage", d:"Une série du kata par semaine avec votre uke. Choix des 3 nage-waza et 2 ne-waza avec votre professeur. Tri des techniques de l'annexe dans l'onglet Suivi."},
+  {w:"Sem. 4 à 7", from:4,to:7, t:"Construction", d:"Kata complet filmé à chaque séance de travail. Épreuve 1 montée et chronométrée. Deux techniques « à revoir » travaillées par semaine."},
+  {w:"Sem. 8 à 10", from:8,to:10, t:"Mise en conditions", d:"Simulation complète, kata puis UV2, devant un enseignant 4e dan ou plus. Tirages blancs de l'épreuve 2."},
+  {w:"Sem. 11 et 12", from:11,to:12, t:"Affûtage", d:"Corrections de détail, volume réduit, uke confirmé pour le jour J."}
+];
+
+/* ---------- Vidéos Kodokan ---------- */
+/* Liens directs vérifiés le 6 nov. 2026 : chaîne KODOKAN (@KODOKANJUDO, UCtF6tu7GuZYkZzht5MIv8UQ). */
+const CH = "https://www.youtube.com/@KODOKANJUDO";
+const VID = {
+  "kata-gatame":"zQR3IOXxO_Q", "kami-shiho-gatame":"HFuMjOv0WN8", "yoko-shiho-gatame":"TT7XJVSEQxA",
+  "kata-juji-jime":"3VZVUAmiMD8", "okuri-eri-jime":"EiqyoVcIAi8", "gyaku-juji-jime":"t3tQriIPdlI",
+  "ude-garami":"AIlTvZb4RlE", "ude-hishigi-juji-gatame":"OWgSOlCuMXw", "ude-hishigi-ude-gatame":"SBf0aTma1VI",
+  "ude-hishigi-hiza-gatame":"H2HtAJdiJcE", "ashi-garami":"BWWb0GoAtZw",
+  "ude-hishigi-ashi-gatame":"ClY7g_pX-4s", "ude-hishigi-hara-gatame":"ZzEycg8R_9M"
+};
+const ESC = {"kesa-gatame":"5_TS0YHdxcQ", "kami-shiho-gatame":"seGsXy9I4G8", "yoko-shiho-gatame":"yK_GSamSPko"};
+const YT = (id) => "https://www.youtube.com/watch?v=" + id;
+function chSearch(q){ return CH + "/search?query=" + encodeURIComponent(q.replace(/gesa/g, "kesa")); }
+function techVideo(name){ const k = name.toLowerCase(); return VID[k] ? {url: YT(VID[k]), direct: true} : {url: chSearch(name), direct: false}; }
+function playIcon(){
+  const ns = "http://www.w3.org/2000/svg", s = document.createElementNS(ns, "svg");
+  s.setAttribute("viewBox","0 0 16 16"); s.setAttribute("width","14"); s.setAttribute("height","14"); s.setAttribute("aria-hidden","true");
+  const p = document.createElementNS(ns, "path"); p.setAttribute("d","M4 2.5v11l9-5.5z"); p.setAttribute("fill","currentColor");
+  s.append(p); return s;
+}
+
+/* ---------- État local ---------- */
+const KEY = "carnet-sandan-v1";
+function fresh(){ return {examDate:"", kata:{}, grid:{}, check:{}, tech:{}, prog:{}, lines:"3", drawLines:"3"}; }
+let S = fresh();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, kids){
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs){
+    if (k === "text") e.textContent = attrs[k];
+    else if (k === "cls") e.className = attrs[k];
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  (kids || []).forEach(c => { if (c != null) e.append(c); });
+  return e;
+}
+function vidLinks(name){
+  const v = techVideo(name), k = name.toLowerCase();
+  const box = el("div",{cls:"vlinks"},[
+    el("a",{cls:"vbtn", href:v.url, target:"_blank", rel:"noopener"},[playIcon(), v.direct ? "Vidéo Kodokan" : "Chercher sur la chaîne Kodokan"])
+  ]);
+  if (ESC[k]) box.append(el("a",{cls:"vbtn alt", href:YT(ESC[k]), target:"_blank", rel:"noopener"},[playIcon(), "Sorties d'uke (Kodokan)"]));
+  return box;
+}
+const fmt = (s) => { s = Math.max(0, Math.floor(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+
+/* ---------- Navigation ---------- */
+const VIEWS = ["examen","kata","uv2","suivi","plan"];
+function route(){
+  let v = (location.hash || "").replace("#","");
+  if (!VIEWS.includes(v)) v = "examen";
+  document.querySelectorAll("[data-view]").forEach(s => s.hidden = s.dataset.view !== v);
+  document.querySelectorAll("[data-tab]").forEach(a => {
+    if (a.dataset.tab === v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
+  });
+  if (v === "examen") renderExam();
+  if (v === "plan") renderPlan();
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
+
+/* ---------- Date et synthèse ---------- */
+function daysLeft(){
+  if (!S.examDate) return null;
+  const d = new Date(S.examDate + "T00:00:00"); if (isNaN(d)) return null;
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.round((d - t) / 86400000);
+}
+function cycleWeek(){
+  const d = daysLeft(); if (d === null) return null;
+  const wRemaining = Math.ceil(d / 7);
+  return 13 - wRemaining; // semaine 1 = 12 semaines avant
+}
+function renderHeader(){
+  const d = daysLeft(), chip = $("jchip");
+  if (d === null) chip.textContent = "Date ?";
+  else if (d > 0) chip.textContent = "J-" + d;
+  else if (d === 0) chip.textContent = "Jour J";
+  else chip.textContent = "Passé";
+}
+function kataMastered(){ let n = 0; for (let i = 1; i <= 15; i++) if ((S.kata[i]||0) === 2) n++; return n; }
+function line3(){ const a = []; NAGE.concat(NE).forEach(f => ANNEXE["3"][f].forEach(t => a.push(t))); return a; }
+function renderExam(){
+  $("examDate").value = S.examDate || "";
+  const d = daysLeft(), w = cycleWeek();
+  let info = "Aucune date fixée.";
+  if (d !== null){
+    if (d < 0) info = "Date passée.";
+    else if (d === 0) info = "C'est le jour de l'examen.";
+    else if (w < 1) info = d + " jours. Le cycle de 12 semaines commence dans " + (1 - w) + " semaine" + (1 - w > 1 ? "s" : "") + ".";
+    else { const ph = PHASES.find(p => w >= p.from && w <= p.to); info = d + " jours · semaine " + w + " sur 12" + (ph ? " · " + ph.t : ""); }
+  }
+  $("dateInfo").textContent = info;
+  const km = kataMastered();
+  const l3 = line3(); const tm = l3.filter(t => (S.tech[t]||0) === 2).length;
+  const cm = CHECK.filter((_, i) => S.check[i]).length;
+  const tiles = $("tiles"); tiles.textContent = "";
+  [["Kata maîtrisé", km, 15, "#kata"], ["Annexe 3e dan", tm, l3.length, "#suivi"], ["Check-list", cm, CHECK.length, "#plan"]].forEach(([l, v, tot, href]) => {
+    const bar = el("div",{cls:"bar"},[el("i")]); bar.firstChild.style.width = Math.round(v / tot * 100) + "%";
+    const vEl = el("span",{cls:"v"},[String(v), el("small",{text:" / " + tot})]);
+    tiles.append(el("a",{cls:"tile", href:href},[vEl, el("span",{cls:"l",text:l}), bar]));
+  });
+}
+$("examDate").addEventListener("change", (e) => { S.examDate = e.target.value; save(); renderHeader(); renderExam(); });
+
+/* ---------- Kata ---------- */
+const KSTATES = ["À travailler","En place","Maîtrisée"];
+function kataBtn(n){
+  const s = S.kata[n] || 0;
+  const b = el("button",{cls:"st" + (s ? " s" + s : ""), type:"button", "aria-label":"État : " + KSTATES[s] + ". Changer", text:KSTATES[s]});
+  b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); S.kata[n] = ((S.kata[n]||0) + 1) % 3; save(); renderKata(); });
+  return b;
+}
+function renderKata(){
+  const cer = $("cerList"); cer.textContent = "";
+  OPEN.concat(COMMON, CLOSE).forEach(t => cer.append(el("li",{text:t})));
+  const list = $("seriesList"); const open = new Set([...list.querySelectorAll("details[open]")].map(d => d.dataset.n));
+  list.textContent = "";
+  KATA.forEach((s, si) => {
+    const done = s.items.filter(it => (S.kata[it.n]||0) === 2).length;
+    const sec = el("div",{cls:"series"},[
+      el("div",{cls:"series-h"},[el("span",{lang:"ja",text:s.jp}), el("h3",{text:s.name}), el("span",{cls:"muted small",text:s.fr}), el("span",{cls:"c",text:done + " / 5 maîtrisées"})])
+    ]);
+    s.items.forEach(it => {
+      const det = el("details",{cls:"tech","data-n":String(it.n)},[
+        el("summary",null,[
+          el("span",{cls:"num",text:String(it.n).padStart(2,"0")}),
+          el("span",{cls:"nm"},[el("b",{text:it.name}), el("small",{lang:"ja",text:it.jp})]),
+          kataBtn(it.n)
+        ]),
+        el("div",{cls:"body"},[
+          el("p",{cls:"setup",text:it.setup}),
+          el("dl",{cls:"tu"},[el("dt",{text:"Tori"}), el("dd",{text:it.tori}), el("dt",{text:"Uke"}), el("dd",{text:it.uke})]),
+          vidLinks(it.name)
+        ])
+      ]);
+      if (open.has(String(it.n))) det.open = true;
+      sec.append(det);
+      if (TRANS[it.n]) sec.append(el("p",{cls:"note",text:"Transition : " + TRANS[it.n]}));
+    });
+    list.append(sec);
+  });
+  $("kataCount").textContent = kataMastered() + " / 15 techniques maîtrisées";
+  const kv = $("kataVid"); kv.textContent = "";
+  kv.append(
+    el("a",{cls:"vbtn", href:chSearch("Katame-no-kata"), target:"_blank", rel:"noopener"},[playIcon(), "Katame-no-kata sur la chaîne Kodokan"]),
+    el("a",{cls:"vbtn alt", href:CH, target:"_blank", rel:"noopener"},[playIcon(), "Chaîne Kodokan"])
+  );
+  const g = $("gridList"); g.textContent = "";
+  GRID.forEach(([t, d], i) => {
+    const id = "grid" + i;
+    const cb = el("input",{type:"checkbox", id:id}); cb.checked = !!S.grid[i];
+    cb.addEventListener("change", () => { S.grid[i] = cb.checked; save(); });
+    g.append(el("label",{for:id},[cb, el("span",null,[el("b",{text:t}), el("small",{text:d})])]));
+  });
+}
+
+/* Répétition pas à pas */
+const STEPS = (() => {
+  const a = [{type:"cer", title:"Ouverture", lines:OPEN, phase:"Cérémonial"}];
+  KATA.forEach(s => s.items.forEach(it => {
+    a.push({type:"tech", it:it, phase:s.name + " · " + s.fr});
+    if (TRANS[it.n]) a.push({type:"trans", text:TRANS[it.n], phase:"Transition"});
+  }));
+  a.push({type:"cer", title:"Clôture", lines:CLOSE, phase:"Cérémonial"});
+  return a;
+})();
+let rhIdx = 0, wake = null;
+async function keepAwake(){ try { if (navigator.wakeLock) wake = await navigator.wakeLock.request("screen"); } catch(e) { wake = null; } }
+function releaseAwake(){ try { if (wake) wake.release(); } catch(e) {} wake = null; }
+function renderStep(){
+  const st = STEPS[rhIdx], card = $("rhCard");
+  card.textContent = "";
+  $("rhPos").textContent = (rhIdx + 1) + " / " + STEPS.length;
+  $("rhPhase").textContent = st.phase;
+  $("rhBar").style.width = ((rhIdx + 1) / STEPS.length * 100) + "%";
+  if (st.type === "cer"){
+    card.append(el("span",{cls:"eyebrow",text:"Cérémonial"}), el("div",{cls:"big",text:st.title}), el("ol",null,st.lines.map(t => el("li",{text:t}))));
+  } else if (st.type === "trans"){
+    card.append(el("span",{cls:"eyebrow",text:"Transition"}), el("div",{cls:"big",text:"Changement de série"}), el("p",{cls:"setup",text:st.text}));
+  } else {
+    const it = st.it;
+    card.append(
+      el("div",{cls:"row",style:"justify-content:space-between"},[el("span",{cls:"eyebrow mono",text:"N° " + String(it.n).padStart(2,"0")}), kataBtnRh(it.n)]),
+      el("div",{cls:"big",text:it.name}),
+      el("div",{cls:"jp",lang:"ja",text:it.jp}),
+      el("p",{cls:"setup",text:it.setup}),
+      el("dl",{cls:"tu"},[el("dt",{text:"Tori"}), el("dd",{text:it.tori}), el("dt",{text:"Uke"}), el("dd",{text:it.uke})]),
+      vidLinks(it.name),
+      el("p",{cls:"mairi",text:"Mairi : deux tapes. Puis relâcher, replacer le bras d'uke, reculer à chikama puis toma."})
+    );
+  }
+  $("rhPrev").disabled = rhIdx === 0;
+  $("rhNext").textContent = rhIdx === STEPS.length - 1 ? "Terminer" : "Suivant";
+}
+function kataBtnRh(n){
+  const b = kataBtn(n);
+  b.addEventListener("click", () => setTimeout(renderStep, 0));
+  return b;
+}
+function openRh(){ rhIdx = 0; $("kataMain").hidden = true; $("rehearse").hidden = false; renderStep(); keepAwake(); window.scrollTo(0,0); }
+function closeRh(){ $("rehearse").hidden = true; $("kataMain").hidden = false; releaseAwake(); renderKata(); }
+$("rhStart").addEventListener("click", openRh);
+$("rhClose").addEventListener("click", closeRh);
+$("rhPrev").addEventListener("click", () => { if (rhIdx > 0){ rhIdx--; renderStep(); } });
+$("rhNext").addEventListener("click", () => { if (rhIdx < STEPS.length - 1){ rhIdx++; renderStep(); } else closeRh(); });
+document.addEventListener("keydown", (e) => {
+  if ($("rehearse").hidden) return;
+  if (e.key === "ArrowRight") $("rhNext").click();
+  if (e.key === "ArrowLeft") $("rhPrev").click();
+});
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("rehearse").hidden) keepAwake(); });
+
+/* ---------- UV2 : sous-onglets ---------- */
+$("uvSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("uvSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  ["chrono","prog","tirage"].forEach(p => $("p-" + p).hidden = p !== b.dataset.p);
+  if (b.dataset.p === "chrono") renderChrono();
+});
+
+/* Programme */
+function progVal(id, f){ return ((S.prog[id] || {})[f] || "").trim(); }
+function blockName(p){ const t = progVal(p.id, "tech"); return t ? p.title.split(" · ")[0] + " · " + t : p.title; }
+function renderProg(){
+  const f = $("progForm"); f.textContent = "";
+  PROG.forEach(p => {
+    const g = el("div",{cls:"fgroup"},[el("b",{text:p.title})]);
+    p.fields.forEach(([k, lab, ph]) => {
+      const id = "p_" + p.id + "_" + k;
+      const inp = el("input",{type:"text", id:id, placeholder:ph, autocomplete:"off"});
+      inp.value = (S.prog[p.id] || {})[k] || "";
+      inp.addEventListener("input", () => { S.prog[p.id] = S.prog[p.id] || {}; S.prog[p.id][k] = inp.value; save(); });
+      g.append(el("label",{for:id},[lab, inp]));
+    });
+    f.append(g);
+  });
+}
+
+/* Chrono épreuve 1 */
+const CK = {running:false, idx:0, acc:[0,0,0,0,0], start:0, timer:null};
+function ckElapsed(i){ return CK.acc[i] + (CK.running && CK.idx === i ? (Date.now() - CK.start) / 1000 : 0); }
+function ckTotals(){
+  let d = 0, s = 0;
+  PROG.forEach((p, i) => { const v = ckElapsed(i); if (p.kind === "d") d += v; else s += v; });
+  return {d, s, t: d + s};
+}
+function renderChrono(){
+  const T = ckTotals();
+  $("ckTotal").textContent = fmt(T.t);
+  const p = PROG[CK.idx];
+  $("ckCur").textContent = "Bloc " + (CK.idx + 1) + " · " + blockName(p);
+  $("ckLabel").textContent = CK.running ? "En cours" : (T.t > 0 ? "En pause" : "Prêt");
+  $("ckGo").textContent = CK.running ? "Pause" : (T.t > 0 ? "Reprendre" : "Démarrer");
+  $("ckNext").disabled = CK.idx >= PROG.length - 1;
+  const scale = 480;
+  $("ckD").style.left = "0"; $("ckD").style.width = Math.min(100, T.d / scale * 100) + "%";
+  $("ckS").style.left = Math.min(100, T.d / scale * 100) + "%"; $("ckS").style.width = Math.max(0, Math.min(100 - T.d / scale * 100, T.s / scale * 100)) + "%";
+  const sum = $("ckSum"); sum.textContent = "";
+  const rows = [
+    ["Debout (blocs 1 à 3)", T.d, T.d >= 180 ? ["ok","3 min atteintes"] : ["warn","minimum 3:00"]],
+    ["Sol (blocs 4 et 5)", T.s, T.s >= 180 ? ["ok","3 min atteintes"] : ["warn","minimum 3:00"]],
+    ["Total épreuve 1", T.t, T.t > 480 ? ["bad","8 min dépassées"] : (T.t > 450 ? ["warn","moins de 30 s"] : ["ok","sous 8:00"])]
+  ];
+  rows.forEach(([l, v, [c, txt]]) => sum.append(el("span",{text:l}), el("span",{cls:"mono",text:fmt(v)}), el("span",{cls:"flag " + c,text:txt})));
+  const bl = $("ckBlocks"); bl.textContent = "";
+  PROG.forEach((pp, i) => {
+    bl.append(el("div",{cls: i === CK.idx ? "on" : ""},[
+      el("span",{cls:"mono muted",text:String(i + 1)}),
+      el("span",{text:blockName(pp)}),
+      el("span",{cls:"tg",text:"cible " + fmt(pp.target)}),
+      el("span",{cls:"t",text:fmt(ckElapsed(i))})
+    ]));
+  });
+}
+function ckTick(){ renderChrono(); }
+$("ckGo").addEventListener("click", () => {
+  if (CK.running){ CK.acc[CK.idx] += (Date.now() - CK.start) / 1000; CK.running = false; clearInterval(CK.timer); releaseAwake(); }
+  else { CK.start = Date.now(); CK.running = true; CK.timer = setInterval(ckTick, 250); keepAwake(); }
+  renderChrono();
+});
+$("ckNext").addEventListener("click", () => {
+  if (CK.idx >= PROG.length - 1) return;
+  if (CK.running){ CK.acc[CK.idx] += (Date.now() - CK.start) / 1000; CK.start = Date.now(); }
+  CK.idx++; renderChrono();
+});
+$("ckReset").addEventListener("click", () => { clearInterval(CK.timer); CK.running = false; CK.idx = 0; CK.acc = [0,0,0,0,0]; releaseAwake(); renderChrono(); });
+
+/* Tirage blanc */
+const DW = {items:[], res:{}, running:false, left:300, end:0, timer:null};
+function pool(lines){
+  const out = {}; const ls = lines === "all" ? ["1","2","3"] : ["3"];
+  NAGE.concat(NE).forEach(f => { const set = new Set(); ls.forEach(l => ANNEXE[l][f].forEach(t => set.add(t))); out[f] = [...set]; });
+  return out;
+}
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function newDraw(){
+  const P = pool(S.drawLines); const used = new Set(); const items = [];
+  shuffle(NAGE).slice(0,3).forEach(f => { let t, k = 0; do { t = pick(P[f]); k++; } while (used.has(t) && k < 20); used.add(t); items.push({f, t}); });
+  shuffle(NE).slice(0,2).forEach(f => { const t = pick(P[f]); used.add(t); items.push({f, t}); });
+  DW.items = items; DW.res = {}; dwStop(); DW.left = 300; renderDraw();
+}
+function dwStop(){ clearInterval(DW.timer); DW.running = false; }
+function renderDraw(){
+  $("dwClock").textContent = fmt(DW.left);
+  $("dwGo").textContent = DW.running ? "Pause" : (DW.left < 300 && DW.left > 0 ? "Reprendre" : "Démarrer");
+  $("dwGo").disabled = DW.left <= 0;
+  $("dwLabel").textContent = DW.left <= 0 ? "Temps écoulé" : (DW.running ? "En cours" : "Tirage prêt");
+  const list = $("drawList"); list.textContent = "";
+  DW.items.forEach((x, i) => {
+    const r = DW.res[i];
+    const okb = el("button",{cls:"btn okb", type:"button", "aria-pressed":String(r === "ok"), text:"Réussie"});
+    const kob = el("button",{cls:"btn kob", type:"button", "aria-pressed":String(r === "ko"), text:"À revoir"});
+    okb.addEventListener("click", () => { DW.res[i] = "ok"; renderDraw(); });
+    kob.addEventListener("click", () => { DW.res[i] = "ko"; S.tech[x.t] = 1; save(); renderDraw(); });
+    const v = techVideo(x.t);
+    list.append(el("div",{cls:"dcard"},[
+      el("b",{text:x.t}),
+      el("span",{cls:"eyebrow",text:(i < 3 ? "Debout · " : "Sol · ") + FAM[x.f]}),
+      el("div",{cls:"acts"},[okb, kob]),
+      el("a",{cls:"vbtn alt", style:"grid-column:1/-1;justify-self:start", href:v.url, target:"_blank", rel:"noopener"},[playIcon(), v.direct ? "Vidéo Kodokan" : "Chercher sur la chaîne Kodokan"])
+    ]));
+  });
+  const ok = Object.values(DW.res).filter(v => v === "ok").length, ko = Object.values(DW.res).filter(v => v === "ko").length;
+  $("drawRes").textContent = (ok + ko) ? ok + " réussie" + (ok > 1 ? "s" : "") + ", " + ko + " à revoir sur 5." : "";
+}
+$("dwGo").addEventListener("click", () => {
+  if (DW.running){ DW.left = Math.max(0, (DW.end - Date.now()) / 1000); dwStop(); releaseAwake(); }
+  else if (DW.left > 0){
+    DW.end = Date.now() + DW.left * 1000; DW.running = true; keepAwake();
+    DW.timer = setInterval(() => { DW.left = Math.max(0, (DW.end - Date.now()) / 1000); if (DW.left <= 0){ dwStop(); releaseAwake(); } renderDraw(); }, 250);
+  }
+  renderDraw();
+});
+$("dwNew").addEventListener("click", newDraw);
+$("drawSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  S.drawLines = b.dataset.l; save();
+  $("drawSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  newDraw();
+});
+
+/* ---------- Suivi ---------- */
+const TSTATES = ["À évaluer","À revoir","Maîtrisée"];
+function renderTech(){
+  $("lineSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.l === S.lines)));
+  const lines = S.lines === "all" ? ["3","2","1"] : ["3"];
+  const uniq = new Set(); lines.forEach(l => NAGE.concat(NE).forEach(f => ANNEXE[l][f].forEach(t => uniq.add(t))));
+  const c = [0,0,0]; uniq.forEach(t => c[S.tech[t] || 0]++);
+  const ct = $("techCounts"); ct.textContent = "";
+  ct.append(el("span",{cls:"flag ok",text:c[2] + " maîtrisée" + (c[2] > 1 ? "s" : "")}), el("span",{cls:"flag warn",text:c[1] + " à revoir"}), el("span",{cls:"muted small",style:"align-self:center",text:c[0] + " à évaluer · " + uniq.size + " au total"}));
+  const box = $("techList"); box.textContent = "";
+  lines.forEach(l => {
+    const nN = NAGE.reduce((a, f) => a + ANNEXE[l][f].length, 0), nS = NE.reduce((a, f) => a + ANNEXE[l][f].length, 0);
+    const sec = el("div",{cls:"stack",style:"gap:14px"},[
+      el("div",{cls:"lineh"},[el("h3",{text:"Ligne " + (l === "1" ? "1er" : l + "e") + " dan"}), el("span",{cls:"small muted",text:nN + " debout · " + nS + " au sol"})])
+    ]);
+    NAGE.concat(NE).forEach(f => {
+      const chips = el("div",{cls:"chips"});
+      ANNEXE[l][f].forEach(t => {
+        const s = S.tech[t] || 0;
+        const b = el("button",{cls:"tchip" + (s ? " s" + s : ""), type:"button", "aria-label":t + " : " + TSTATES[s], text:t});
+        b.addEventListener("click", () => { S.tech[t] = ((S.tech[t]||0) + 1) % 3; save(); renderTech(); });
+        const v = techVideo(t);
+        const a = el("a",{cls:"vmini", href:v.url, target:"_blank", rel:"noopener", "aria-label":(v.direct ? "Vidéo Kodokan : " : "Chercher sur la chaîne Kodokan : ") + t},[playIcon()]);
+        chips.append(el("span",{cls:"tpair"},[b, a]));
+      });
+      sec.append(el("div",{cls:"fam"},[el("h4",{text:FAM[f]}), chips]));
+    });
+    box.append(sec);
+  });
+}
+$("lineSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; S.lines = b.dataset.l; save(); renderTech(); });
+
+/* ---------- Plan ---------- */
+function renderPlan(){
+  const w = cycleWeek(), d = daysLeft();
+  let info = "Fixez la date de votre session dans l'onglet Examen pour situer la semaine en cours.";
+  if (d !== null){
+    if (d < 0) info = "La date fixée est passée.";
+    else if (d === 0) info = "C'est le jour de l'examen.";
+    else if (w < 1) info = "Le cycle commence dans " + (1 - w) + " semaine" + (1 - w > 1 ? "s" : "") + ", 12 semaines avant votre session.";
+    else info = "Semaine " + w + " sur 12, à " + d + " jours de votre session.";
+  }
+  $("planInfo").textContent = info;
+  const ol = $("phases"); ol.textContent = "";
+  PHASES.forEach(p => {
+    const now = w !== null && d >= 0 && w >= p.from && w <= p.to;
+    ol.append(el("li",{cls: now ? "now" : ""},[el("span",{cls:"wk",text:p.w}), el("div",null,[el("b",{text:p.t + (now ? " · en cours" : "")}), el("p",{text:p.d})])]));
+  });
+  const cl = $("checkList"); cl.textContent = "";
+  CHECK.forEach((t, i) => {
+    const id = "chk" + i;
+    const cb = el("input",{type:"checkbox", id:id}); cb.checked = !!S.check[i];
+    cb.addEventListener("change", () => { S.check[i] = cb.checked; save(); });
+    cl.append(el("label",{for:id},[cb, el("span",{text:t})]));
+  });
+}
+let vidUrl = null;
+$("vidFile").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (vidUrl) URL.revokeObjectURL(vidUrl);
+  vidUrl = URL.createObjectURL(f);
+  const v = $("vid"); v.src = vidUrl; v.hidden = false;
+});
+
+/* ---------- Démarrage ---------- */
+renderHeader(); renderKata(); renderProg(); renderChrono();
+$("drawSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.l === S.drawLines)));
+newDraw(); renderTech(); route();
+})();
+</script>
+
+<script>
+(function(){
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("./sw.js", {scope: "./"}).then(function(){
+      return navigator.serviceWorker.ready;
+    }).then(function(){
+      var f = document.querySelector("#v-examen footer.src");
+      if (f) f.append(" Appli enregistrée sur ce téléphone : elle fonctionne sans réseau.");
+    }).catch(function(){});
+  });
+})();
+</script>
+</body>
+</html>

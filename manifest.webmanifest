@@ -1,0 +1,16 @@
+{
+  "name": "Carnet Sandan",
+  "short_name": "Sandan",
+  "description": "Préparation au 3e dan judo : katame-no-kata, UV2, suivi de l'annexe 1 et plan.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ECEFE6",
+  "theme_color": "#ECEFE6",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
