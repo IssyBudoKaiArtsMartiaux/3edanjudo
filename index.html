@@ -448,7 +448,7 @@ nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft
     </div>
     <div class="counts" id="techCounts"></div>
     <div id="techList" class="stack" style="gap:22px"></div>
-    <footer class="src">Liste de l'annexe 1 officielle 2025-2026, identique au résumé 2026-2027 de JudoLink vérifié le 5 octobre 2026. À recouper avec votre CORG. Vidéos : chaîne officielle KODOKAN, liens directs vérifiés le 6 novembre 2026 ; sinon le triangle ouvre une recherche sur cette chaîne. Certains noms de la nomenclature française n'existent pas chez le Kodokan : la recherche peut alors ne rien donner.</footer>
+    <footer class="src">Liste de l'annexe 1 officielle 2025-2026, identique au résumé 2026-2027 de JudoLink vérifié le 5 octobre 2026. À recouper avec votre CORG. Vidéos : lien direct vers la chaîne officielle KODOKAN quand il a pu être vérifié ; sinon le triangle lance une recherche YouTube « KODOKAN + nom de la technique ». Certains noms de la nomenclature française n'existent pas chez le Kodokan : la recherche peut alors ne rien donner.</footer>
   </section>
 
   <!-- PLAN -->
@@ -603,15 +603,22 @@ const VID = {
   "kata-juji-jime":"3VZVUAmiMD8", "okuri-eri-jime":"EiqyoVcIAi8", "gyaku-juji-jime":"t3tQriIPdlI",
   "ude-garami":"AIlTvZb4RlE", "ude-hishigi-juji-gatame":"OWgSOlCuMXw", "ude-hishigi-ude-gatame":"SBf0aTma1VI",
   "ude-hishigi-hiza-gatame":"H2HtAJdiJcE", "ashi-garami":"BWWb0GoAtZw",
-  "ude-hishigi-ashi-gatame":"ClY7g_pX-4s", "ude-hishigi-hara-gatame":"ZzEycg8R_9M"
+  "ude-hishigi-ashi-gatame":"ClY7g_pX-4s", "ude-hishigi-hara-gatame":"ZzEycg8R_9M",
+  /* vérifiés le 13 nov. 2026 */
+  "sukui-nage":"vU6aJ2kFxoI", "ippon-seoi-nage":"FQnOlCxo4oI", "morote-seoi-nage":"zIq0xI0ogxk", "ura-nage":"Fgi9b8DJ5sQ"
 };
+/* Noms de l'annexe française -> titres utilisés par le Kodokan, pour la recherche. */
+const KNAME = {"hon-gesa-gatame":"Kesa-gatame", "kuzure-gesa-gatame":"Kuzure-kesa-gatame", "ushiro-gesa-gatame":"Ushiro-kesa-gatame",
+  "makura-gesa-gatame":"Makura-kesa-gatame", "de-ashi-barai":"De-ashi-harai", "okuri-ashi-barai":"Okuri-ashi-harai",
+  "ryo-te-jime":"Ryote-jime", "kata-ha-jime":"Kataha-jime", "kata-te-jime":"Katate-jime", "sankaku-jime":"Sankaku-jime"};
 const ESC = {"kesa-gatame":"5_TS0YHdxcQ", "kami-shiho-gatame":"seGsXy9I4G8", "yoko-shiho-gatame":"yK_GSamSPko"};
 const YT = (id) => "https://www.youtube.com/watch?v=" + id;
 /* Démonstration complète du katame-no-kata : repères de début fournis par l'utilisateur (12 nov. 2026). */
 const DEMO = "oKaCgO0FdPk";
 const DEMO_T = {open:5, 1:32, 2:86, 3:122, 4:185, 5:236, 6:286, 7:340, 8:357, 9:374, 10:402, 11:452, 12:484, 13:500, 14:533, 15:554, close:570};
 const demoUrl = (t) => "https://www.youtube.com/watch?v=" + DEMO + "&t=" + t + "s";
-function chSearch(q){ return CH + "/search?query=" + encodeURIComponent(q.replace(/gesa/g, "kesa")); }
+/* Recherche YouTube générale : le lien de recherche interne à la chaîne s'arrêtait à la page de la chaîne sur iPhone. */
+function chSearch(q){ const k = q.toLowerCase(); return "https://www.youtube.com/results?search_query=" + encodeURIComponent("KODOKAN " + (KNAME[k] || q)); }
 function techVideo(name){ const k = name.toLowerCase(); return VID[k] ? {url: YT(VID[k]), direct: true} : {url: chSearch(name), direct: false}; }
 function playIcon(){
   const ns = "http://www.w3.org/2000/svg", s = document.createElementNS(ns, "svg");
@@ -930,7 +937,7 @@ function renderDraw(){
       el("b",{text:x.t}),
       el("span",{cls:"eyebrow",text:(i < 3 ? "Debout · " : "Sol · ") + FAM[x.f]}),
       el("div",{cls:"acts"},[okb, kob]),
-      el("a",{cls:"vbtn alt", style:"grid-column:1/-1;justify-self:start", href:v.url, target:"_blank", rel:"noopener"},[playIcon(), v.direct ? "Vidéo Kodokan" : "Chercher sur la chaîne Kodokan"])
+      el("a",{cls:"vbtn alt", style:"grid-column:1/-1;justify-self:start", href:v.url, target:"_blank", rel:"noopener"},[playIcon(), v.direct ? "Vidéo Kodokan" : "Chercher la vidéo Kodokan"])
     ]));
   });
   const ok = Object.values(DW.res).filter(v => v === "ok").length, ko = Object.values(DW.res).filter(v => v === "ko").length;
@@ -974,7 +981,7 @@ function renderTech(){
         const b = el("button",{cls:"tchip" + (s ? " s" + s : ""), type:"button", "aria-label":t + " : " + TSTATES[s], text:t});
         b.addEventListener("click", () => { S.tech[t] = ((S.tech[t]||0) + 1) % 3; save(); renderTech(); });
         const v = techVideo(t);
-        const a = el("a",{cls:"vmini", href:v.url, target:"_blank", rel:"noopener", "aria-label":(v.direct ? "Vidéo Kodokan : " : "Chercher sur la chaîne Kodokan : ") + t},[playIcon()]);
+        const a = el("a",{cls:"vmini", href:v.url, target:"_blank", rel:"noopener", "aria-label":(v.direct ? "Vidéo Kodokan : " : "Chercher la vidéo Kodokan : ") + t},[playIcon()]);
         chips.append(el("span",{cls:"tpair"},[b, a]));
       });
       sec.append(el("div",{cls:"fam"},[el("h4",{text:FAM[f]}), chips]));
